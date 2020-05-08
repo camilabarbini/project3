@@ -4,8 +4,9 @@ const bodyParser = require('body-parser');
 
 require('./database/index');
 require('./authorization');
-//require('./database/setup');
+
 const products = require('./routes/products');
+const orders = require('./routes/orders')
 
 server.use(bodyParser.json());
 
@@ -16,5 +17,6 @@ server.listen(3000, () => {
 server.use(bodyParser.json());
 
 server.use('/productos', products);
+server.use('/pedidos', orders);
 
 
