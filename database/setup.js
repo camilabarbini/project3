@@ -1,42 +1,40 @@
 const express = require('express');
 const server = express();
-
-let dataDB = {
-  user: "sNUbrPBJdI",
-  password: "GdTXgKAFV9",
-  host: "remotemysql.com",
-  port: 3306,
-  database: "sNUbrPBJdI",
-}
-
-const Sequelize = require('sequelize');
-const sequelize = new Sequelize(`mysql://${dataDB.user}:${dataDB.password}@${dataDB.host}:${dataDB.port}/${dataDB.database}`);
-
+const conectToDatabase = require ('../database/index');
+const sequelize = conectToDatabase.sequelize;
 
 server.listen(3000, () => {
   console.log('servidor iniciado...');
 });
+
+
+
 /***************************************CREAR TABLAS********************/
-(async function createProducts(){
-    const query = 'CREATE TABLE PRODUCTS (productId INT PRIMARY KEY AUTO_INCREMENT, title VARCHAR(60) NOT NULL, price INT NOT NULL, img VARCHAR(160) NOT NULL, isFavorite BOOLEAN NOT NULL DEFAULT FALSE )'
-    await sequelize.query(query, {type: sequelize.QueryTypes.CREATE})
-        .then(response=>response)
-        .catch(e=>e);
+(function createProducts(){
+    const query = 'CREATE TABLE PRODUCTS (productId INT PRIMARY KEY AUTO_INCREMENT, title VARCHAR(60) NOT NULL, price INT NOT NULL, img VARCHAR(160) NOT NULL)'
+    createTable(query)
 })();
 
 (async function createOrders(){
-    const query = 'CREATE TABLE ORDERS (orderId INT PRIMARY KEY AUTO_INCREMENT, userId INT NOT NULL, productsId VARCHAR(60) NOT NULL, status VARCHAR(60) NOT NULL, total INT NOT NULL, payloadMethod VARCHAR(60) NOT NULL, address VARCHAR(60) NOT NULL)'
-    await sequelize.query(query, {type: sequelize.QueryTypes.CREATE})
-        .then(response=>response)
-        .catch(e=>e);
+    const query = 'CREATE TABLE ORDERS (orderId INT PRIMARY KEY AUTO_INCREMENT, userId INT NOT NULL, productsDetail JSON NOT NULL, status VARCHAR(60) NOT NULL, total INT NOT NULL, payloadMethod VARCHAR(60) NOT NULL, address VARCHAR(60) NOT NULL, date DATE, time TIME)'
+    createTable(query)
 })();
 
-(async function createPriceList(){
-  const query = 'CREATE TABLE PRICELIST (productId INT PRIMARY KEY NOT NULL, PRICE INT NOT NULL)'
+(async function createUsers(){
+  const query = 'CREATE TABLE USERS (userId INT PRIMARY KEY AUTO_INCREMENT, fullName VARCHAR(60) NOT NULL, email VARCHAR(60) NOT NULL, password VARCHAR(60) NOT NULL, address VARCHAR(60) NOT NULL, celphone VARCHAR(60) NOT NULL, favoriteProductsById VARCHAR(60), isAdmin BOOLEAN NOT NULL DEFAULT FALSE)'
+  createTable(query)
+})();
+
+(async function createStatus(){
+  const query = 'CREATE TABLE STATUS (statusId INT PRIMARY KEY AUTO_INCREMENT, status VARCHAR(60) NOT NULL)'
+  createTable(query)
+})();
+
+async function createTable(query){
   await sequelize.query(query, {type: sequelize.QueryTypes.CREATE})
         .then(response=>response)
         .catch(e=>e);
-})();
+}
 
 /***************************************CARGAR PRODUCTOS********************/
 let products = [
@@ -76,41 +74,40 @@ let products = [
     img: 'https://www.hola.com/imagenes/cocina/recetas/20180226120919/crema-calabaza-jengibre/0-724-626/crema-calabaza-m.jpg'
   }
 ]
+let statusArray = ["nuevo", "confirmado", "preparando","enviando","entregado","cancelado"]
+
+
 products.forEach((product,index)=>{
   let productId,title,price,img;
-  productId = index
+  productId = index+1;
   title=product.title;
   price=product.price;
   img=product.img;
   insertProduct(productId,title,price,img);
 })
+statusArray.forEach((element,index)=>{
+  let statusId, status;
+  statusId = index + 1;
+  status = element;
+  insertStatus(statusId,status)
+})
+
 async function insertProduct(productId,title, price, img){
-  const query = 'INSERT INTO PRODUCTS (productId, title, price, img, isFavorite) VALUES(?,?,?,?,?)'
+  const query = 'INSERT INTO PRODUCTS (productId, title, price, img) VALUES(?,?,?,?)'
   await sequelize.query(query, {
-      replacements: [productId,title, price, img, 0],
+      replacements: [productId,title, price, img],
       type: sequelize.QueryTypes.INSERT})
-      .then(response=>{console.log(response), getAllProducts()})
+      .then(response=>console.log(response))
         .catch(e=>console.log(e))
 }
-async function getAllProducts(){
-  const query = 'SELECT * FROM PRODUCTS'
-  const productsInDb = await sequelize.query(query, {
-      type: sequelize.QueryTypes.SELECT})
-      .then(response=>response)
-      .catch(e=>e);
-  console.log(productsInDb)
-  productsInDb.forEach(element => {
-    updatePriceList(element.productId, element.price)
-  });
-};
 
-async function updatePriceList(productId, price){
-  const query = 'INSERT INTO PRICELIST (productId, price) VALUES(?,?)'
-    await sequelize.query(query, {
-        replacements: [productId, price],
-        type: sequelize.QueryTypes.INSERT})
-        .then(response=>console.log(response))
-        .catch(e=>console.log(e))
+async function insertStatus(statusId, status){
+  const query = 'INSERT INTO STATUS (statusId,status) VALUES(?,?)'
+  await sequelize.query(query, {
+      replacements: [statusId, status],
+      type: sequelize.QueryTypes.INSERT})
+      .then(response=>console.log(response))
+      .catch(e=>console.log(e))
 }
 
 

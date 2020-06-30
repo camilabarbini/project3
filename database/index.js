@@ -1,5 +1,10 @@
+let config = require('../config');
+//let dataDB = config.dataDB; (remota)
+let dataDB = config.dataDBLocal;
 const Sequelize = require('sequelize');
-const sequelize = new Sequelize('mysql://sNUbrPBJdI:GdTXgKAFV9@remotemysql.com:3306/sNUbrPBJdI');
+
+//const sequelize = new Sequelize(`mysql://${dataDB.user}:${dataDB.password}@${dataDB.host}:${dataDB.port}/${dataDB.database}`); (remota)
+const sequelize = new Sequelize(`mysql://${dataDB.user}@${dataDB.host}:${dataDB.port}/${dataDB.database}`); 
 
 (async function databaseAuthenticate(){
     try{
@@ -9,3 +14,5 @@ const sequelize = new Sequelize('mysql://sNUbrPBJdI:GdTXgKAFV9@remotemysql.com:3
         console.error('Unable to connect to the database:', error);
     }
 })()
+
+module.exports = { sequelize, Sequelize }
