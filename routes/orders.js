@@ -27,19 +27,26 @@ router.get('/', [checkToken, checkAdmin] ,(req,res)=>{
 
 router.post('/', [checkToken, verifyOrderData, verifyUserId,verifyProductDetail],async(req,res)=>{
     var { userId, productsDetail, payloadMethod } = req.body;
-    const address = await getAddress(userId, req);
+    const address = await getAddress(userId, req)
+    .then(response=>response)
+    .catch(e=>e);
     const dateAndTime = moment().format('YYYY-MM-DD, HH:mm:ss');
     const date = dateAndTime.split(", ")[0];
     const time = dateAndTime.split(", ")[1];
-    await getProductsArray(productsDetail, res);
-    productsDetail = productsArray
+    await getProductsArray(productsDetail, res)
+    .then(response=>response)
+    .catch(e=>e);
+    productsDetail = productsArray;
     const total = getTotal(productsArray);
     productsDetail = JSON.stringify(productsArray);
-    let params= {tableName: "ORDERS",
+    if(productsArray.length){
+        let params= {tableName: "ORDERS",
         keys:["userId", "productsDetail", "status", "total", "payloadMethod", "address", "date", "time"],
         replacements:[ `${userId},'${productsDetail}',"nuevo",${total},"${payloadMethod}","${address}","${date}","${time}"`]
-    };
-    insertElements(params, res)
+        };
+        insertElements(params, res)
+    }
+    
 })
 
 router.patch('/',[checkToken,checkAdmin,checkStatus], async (req,res)=>{
@@ -89,7 +96,9 @@ router.get('/id/:id', [checkToken,checkAdmin] ,(req,res)=>{
 router.get('/mispedidos', [checkToken] ,async (req,res)=>{
     let token = req.headers.authorization.split(" ")[1];
     let userId;
-    const decode = await verifyToken(token);
+    const decode = await verifyToken(token)
+    .then(response=>response)
+    .catch(e=>e);
     const email = decode.email;
     let query = `SELECT * FROM USERS WHERE email="${email}"`;
     const user = await sequelize.query(query, {
@@ -101,6 +110,16 @@ router.get('/mispedidos', [checkToken] ,async (req,res)=>{
     getElements(query,res,userId)
 })
 
+router.delete('/id/:id', [verifyOrderId,checkToken, checkAdmin], async (req,res)=>{
+    const id = req.params.id;
+    query = `DELETE FROM ORDERS WHERE orderId=${id}`;
+    await sequelize.query(query, {
+        type: sequelize.QueryTypes.DELETE})
+        .then(response=>{
+            res.status(200).json("El pedido fue eliminado")
+        })
+        .catch(e=>{res.status(400).json(e)})
+})
 
 
 /*******************************************************MIDDLEWARES***********************/
@@ -141,6 +160,7 @@ function verifyProductDetail(req,res,next){
     }
     else{next()}
 }
+
 async function verifyUserId(req,res,next){
     const userId  = req.body.userId;
     const query = `SELECT * FROM USERS WHERE userId=${userId}`
@@ -155,7 +175,21 @@ async function verifyUserId(req,res,next){
         res.status(404).json("No existe usuario con ese id")
     }
 }
-
+async function verifyOrderId(req,res,next){
+    const id = req.params.id;
+    let query = `SELECT * FROM ORDERS WHERE orderId=${id}`;
+    await sequelize.query(query, {
+        type: sequelize.QueryTypes.SELECT})
+        .then(response=>{
+            if(!response.length){
+                res.status(404).json("No existe ningun elemento con ese id")
+            }
+            else{
+                next()
+            }
+        })
+        .catch(e=>{res.status(400).json(e)})
+}
 /*******************************************************FUNCIONES***********************/
 async function getProductsArray(productsDetail, res){
     productsArray = [];

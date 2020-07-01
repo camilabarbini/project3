@@ -34,23 +34,46 @@ router.post('/', [checkToken, checkAdmin, verifyData], (req, res) => {
     insertElements(params, res)
 })
 
+router.patch('/modificar/:id',[verifyProductId,checkToken, checkAdmin], (req,res)=>{
+    const productId = req.params.id;
+    let keysArray = [];
+    let replacementsArray = [];
+    const {price, img, title} = req.body;
+    function completeParams(data,keyParam){
+        if(data){
+            keysArray.push(keyParam);
+            replacementsArray.push(data);
+        }
+        return
+    }
+    completeParams(price, "price");
+    completeParams(img, "img");
+    completeParams(title, "title");
+    if(keysArray.length){
+        let params = {
+            tableName: "PRODUCTS",
+            keys: keysArray,
+            replacements: replacementsArray,
+            filterKey: "productId",
+            valueFilter:`${productId}`
+        }
+        updateElements(params,res)
+    }
+    else{
+        res.status(400).json("Falta al menos un dato válido para modificar")
+    }
+    
+})
+
+
 router.get('/id/:id', (req, res) => {
     const id = req.params.id;
     const query = `SELECT * FROM PRODUCTS WHERE productId=${id}`;
     getProducts(query, res, id)
 })
 
-router.delete('/id/:id', [checkToken, checkAdmin], async (req,res)=>{
+router.delete('/id/:id', [verifyProductId,checkToken, checkAdmin], async (req,res)=>{
     const id = req.params.id;
-    let query = `SELECT * FROM PRODUCTS WHERE productId=${id}`;
-    await sequelize.query(query, {
-        type: sequelize.QueryTypes.SELECT})
-        .then(response=>{
-            if(!response.length){
-                res.status(404).json("No existe ningun elemento con ese id")
-            }
-        })
-        .catch(e=>{res.status(400).json(e)})
     query = `DELETE FROM PRODUCTS WHERE productId=${id}`;
     await sequelize.query(query, {
         type: sequelize.QueryTypes.DELETE})
@@ -62,9 +85,13 @@ router.delete('/id/:id', [checkToken, checkAdmin], async (req,res)=>{
 
 router.get('/favoritos', checkToken, async (req, res) => {
     let token = req.headers.authorization.split(" ")[1];
-    const decode = await verifyToken(token);
+    const decode = await verifyToken(token)
+    .then(response=>response)
+    .catch(e=>e);
     const email = decode.email;
-    await getFavoritesByUser(res, email);
+    await getFavoritesByUser(res, email)
+    .then(response=>response)
+    .catch(e=>e);
     if (favoritesArray.length) {
         let favorites = `productId=${favoritesArray[0]} `;
         for (let n = 1; n < favoritesArray.length; n++) {
@@ -78,12 +105,14 @@ router.get('/favoritos', checkToken, async (req, res) => {
     }
 })
 
-router.patch('/favoritos/:id', checkToken, async (req, res) => {
+router.patch('/favoritos/:id', [verifyProductId, checkToken], async (req, res) => {
     const productId = req.params.id;
     let token = req.headers.authorization.split(" ")[1];
     const decode = await verifyToken(token);
     const email = decode.email;
-    await getFavoritesByUser(res, email);
+    await getFavoritesByUser(res, email)
+    .then(response=>response)
+    .catch(e=>e);
     await checkFavorites(favoritesArray, productId);
     await updateFavoritesArray(favoritesArray, productId);
     let params = {
@@ -106,6 +135,21 @@ router.patch('/favoritos/:id', checkToken, async (req, res) => {
 
 
 /***************************************************MIDDLEWARES*******************************/
+async function verifyProductId(req,res,next){
+    const id = req.params.id;
+    let query = `SELECT * FROM PRODUCTS WHERE productId=${id}`;
+    await sequelize.query(query, {
+        type: sequelize.QueryTypes.SELECT})
+        .then(response=>{
+            if(!response.length){
+                res.status(404).json("No existe ningun elemento con ese id")
+            }
+            else{
+                next()
+            }
+        })
+        .catch(e=>{res.status(400).json(e)})
+}
 
 function verifyData(req, res, next) {
     const { title, price, img } = req.body;
@@ -116,6 +160,8 @@ function verifyData(req, res, next) {
         next()
     }
 }
+
+
 
 /***************************************************FUNCIONES*******************************/
 

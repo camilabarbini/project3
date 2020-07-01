@@ -11,7 +11,8 @@ tags:
       description: "Orders route"
  -  name: "usuarios"
       description: "Users route"
-    
+ 
+
     
 paths:
   /productos:
@@ -97,7 +98,21 @@ paths:
             description: "Hubo un error validando el token"
           "404":
             description: "No existe ningun elemento con ese id"
-  
+  /productos/modificar/:id:
+      patch:
+        summary: "Update the product with the specific id"
+        responses:
+          "200":
+            description: "El elemento fue actualizado"
+          "400":
+            description: "Bad request"
+          "400":
+            description: "Hubo un error validando el token"
+          "400":
+            description: "Falta al menos un dato válido para modificar"
+          "404":
+            description: "No existe ningun elemento con ese id"
+
   /pedidos:
     get:
         summary: "Show all orders at the database if you are an admin user"
@@ -118,7 +133,7 @@ paths:
         description: ""
         responses:
           "200":
-            description: "successful operation"
+            description: "El elemento fue agregado"
           "400":
             description: "Bad request"
           "400":
@@ -150,18 +165,20 @@ paths:
             $ref: "#/definitions/patchPedidos"
         responses:
           "200":
-            description: "successful operation"
+            description: "El elemento fue actualizado"
           "400":
             description: "Bad request"
           "400":
             description: "Hubo un error validando el token"
+          "400":
+            description: "Falta al menos un dato válido para modificar"
           "401":
             description: "Usuario no autorizado"
           "404":
             description: "No existe ningun elemento con ese id"
   /pedidos/id/:orderId:
     get:
-      summary: "Show all orders at the database with the specific id"
+      summary: "Show the order at the database with the specific id"
       responses:
           "200":
             description: "successful operation"
@@ -175,6 +192,19 @@ paths:
             description: "Usuario no autorizado"
           "404":
             description: "No hay elementos para mostrar"
+    delete:
+      summary: "Delete the order at the database with the specific id"
+      responses:
+          "200":
+            description: "El pedido fue eliminado"
+          "400":
+            description: "Bad request"
+          "400":
+            description: "Hubo un error validando el token"
+          "401":
+            description: "Usuario no autorizado"
+          "404":
+            description: "No existe ningun elemento con ese id"
   /pedidos/estado/:orderStatus:
     get:
       summary: "Show all orders at the database with the specific status"

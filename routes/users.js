@@ -33,7 +33,9 @@ router.get('/id/:id', [checkToken, checkAdmin],(req,res)=>{
 
 router.get('/perfil', checkToken, async (req,res)=>{
     let token = req.headers.authorization.split(" ")[1];
-    const decode = await verifyToken(token);
+    const decode = await verifyToken(token)
+    .then(response=>response)
+    .catch(e=>e);
     const email = decode.email;
     const query = `SELECT * FROM USERS WHERE email="${email}"`;
     getUsers(query, res)
@@ -57,12 +59,16 @@ router.post('/crearCuenta', [verifyData, verifyUser],async (req,res)=>{
 
 router.post('/login', verifyDataLogin, async (req,res)=>{
     const {email, password} = req.body;
-    const validated = await validateUser(email, password);
+    const validated = await validateUser(email, password)
+    .then(response=>response)
+    .catch(e=>e);
     if(!validated){
         res.status(404).json("Usuario y/o contraseña incorrectos")
     }
     else{
-        const isAdmin = await isAdminFunc(email);
+        const isAdmin = await isAdminFunc(email)
+        .then(response=>response)
+        .catch(e=>e);
         const token= jwt.sign({
             email: email, isAdmin: isAdmin }, firmaSeguraJWT);
         res.status(200).json({token})
@@ -92,7 +98,9 @@ router.patch('/admin',[checkToken, checkAdmin], (req,res)=>{
 
 router.patch('/modificar', [checkToken, checkInfo], async (req,res)=>{
     let token = req.headers.authorization.split(" ")[1];
-    const decode = await verifyToken(token);
+    const decode = await verifyToken(token)
+    .then(response=>response)
+    .catch(e=>e);
     const email = decode.email;
     let keysArray = [];
     let replacementsArray = [];
@@ -114,14 +122,20 @@ router.patch('/modificar', [checkToken, checkInfo], async (req,res)=>{
     completeParams(address, "address");
     completeParams(celphone, "celphone");
     
-    let params = {
-        tableName: "USERS",
-        keys: keysArray,
-        replacements: replacementsArray,
-        filterKey: "email",
-        valueFilter:`${email}`
+    if(keysArray.length){
+        let params = {
+            tableName: "USERS",
+            keys: keysArray,
+            replacements: replacementsArray,
+            filterKey: "email",
+            valueFilter:`${email}`
+        }
+        updateElements(params,res)
     }
-    updateElements(params,res)
+    else{
+        res.status(400).json("Falta al menos un dato válido para modificar")
+    }
+    
 })
 
 /***************************************************MIDDLEWARES*******************************/
@@ -181,7 +195,9 @@ async function validateUser(email, password){
         .then(response=>response)
         .catch(e=>{res.status(400).json(e)});
     if(user.length){
-        const validated = await bcrypt.compare(password, user[0].password);
+        const validated = await bcrypt.compare(password, user[0].password)
+        .then(response=>response)
+        .catch(e=>e);
         if(validated){
             return true
         }

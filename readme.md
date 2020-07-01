@@ -25,5 +25,23 @@ Ya podemos usar la API
 Para hacer más fácil el proceso de corrección recomiendo utilizar POSTMAN con la siguiente coleccion, imortandola mediante el link:
 	https://www.getpostman.com/collections/142da8cd66adb45dc16c
 
-
-
+Para parametrizar la conexión a la base:
+  En el archivo config.js en la carpeta principal se pueden modificar los datos específicos para una base de datos remota o local (objetos por separado)
+Ejemplo:
+	REMOTA
+	let dataDBRemota = {
+		user: "sNUbrPBJdI",
+		password: "GdTXgKAFV9",
+		host: "remotemysql.com",
+		port: 3306,
+		database: "sNUbrPBJdI",
+	}
+	LOCAL
+	let dataDBLocal = {
+		user: "root",
+		host: "localhost",
+		port: 3306,
+		database: "delilahResto",
+	}
+En los archivos index y createDataBase, dentro de la carpeta database se encuentran por separado las variables para los parametros de base de datos y la variable sequelize. En este caso en particular se encuentran comentadas las correspondientes a la conexión para base de datos remota..
+En caso de querer conectar una base de datos remota, los pasos a seguir son los mismos que con local, comentando los parametros locales y "descomentando" los parametros remotos. 
