@@ -1,5 +1,18 @@
+let config = require('../config');
 const Sequelize = require('sequelize');
-const sequelize = new Sequelize('mysql://sNUbrPBJdI:GdTXgKAFV9@remotemysql.com:3306/sNUbrPBJdI');
+
+/******PARA CONEXIÓN REMOTA****/
+//let dataDB = config.dataDB;
+
+/******PARA CONEXIÓN LOCAL****/
+let dataDB = config.dataDBLocal; //(local)
+
+
+/******PARA CONEXIÓN REMOTA****/
+//const sequelize = new Sequelize(`mysql://${dataDB.user}:${dataDB.password}@${dataDB.host}:${dataDB.port}/${dataDB.database}`); (remota)
+
+/******PARA CONEXIÓN LOCAL****/
+const sequelize = new Sequelize(`mysql://${dataDB.user}@${dataDB.host}:${dataDB.port}/${dataDB.database}`); 
 
 (async function databaseAuthenticate(){
     try{
@@ -10,20 +23,4 @@ const sequelize = new Sequelize('mysql://sNUbrPBJdI:GdTXgKAFV9@remotemysql.com:3
     }
 })()
 
-
-/* sequelize.authenticate().then(async()=>{
-    const query = 'SELECT * FROM CAMILA'
-    const results = await sequelize.query(query, { raw: true});
-    console.log(results)
-}); */
-
-
-
-//sequelize.query('SELECT * FROM CAMILA',{
-  //  type:sequelize.QueryTypes.SELECT}
-//).then(function(resultados){res.json(resultados)
-/* sequelize.authenticate().then(async()=>{
-const query = 'SELECT * FROM CAMILA'
-await sequelize.query(query, { raw: true}); */
-//res.json(results)
-//})
+module.exports = { sequelize, Sequelize }
