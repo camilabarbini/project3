@@ -1,0 +1,618 @@
+info:
+  description: "This is a sample API Delilah Resto"
+  version: "1.0.0"
+  title: "Delilah Resto API"
+  contact:
+    email: "camila.barbini@gmail.com"
+tags:
+ -  name: "productos"
+      description: "Products route"
+ -  name: "pedidos"
+      description: "Orders route"
+ -  name: "usuarios"
+      description: "Users route"
+ 
+
+    
+paths:
+  /productos:
+    get:
+      summary: "Show all products at the database"
+      description: ""
+      responses:
+        "200":
+          description: "successful operation"
+          schema:
+            $ref: "#/definitions/getProductos"
+        "400":
+          description: "Bad request"
+    post:
+      summary: "Add a new product to the database"
+      description: ""
+      responses:
+          "200":
+            description: "successful operation"
+          "400":
+            description: "Bad request"
+          "400":
+            description: "Hubo un error validando el token"
+          "400":
+            description: "Falta ingresar uno o más datos""
+          "401":
+            description: "Usuario no autorizado"
+          "404":
+            description: "No existe ningun elemento con ese id"
+      parameters:
+        in: "body"
+        name: "body"
+        description: "Product object that needs to be added to the database"
+        required: true
+        schema:
+          $ref: "#/definitions/postProductos"
+  /productos/id/:productId:
+      get:
+        summary: "Show all products at the database with the specific id"
+        responses:
+          "200":
+            description: "successful operation"
+            schema:
+              $ref: "#/definitions/getProductos"
+          "400":
+            description: "Bad request"
+          "404":
+            description: "No existe ningun elemento con ese id"
+      delete: 
+        summary: "Remove the product at the database with the especific id"
+        responses:
+          "200":
+            description: "successful operation"
+          "400":
+            description: "Hubo un error validando el token"
+          "401":
+            description: "Usuario no autorizado"  
+          "404":
+            description: "No existe ningun elemento con ese id"
+  /productos/favoritos:
+      get:
+        summary: "Shows all the user´s favorite products"
+        responses:
+          "200":
+            description: "successful operation"
+            schema:
+              $ref: "#/definitions/getProductos"
+          "400":
+            description: "Bad request"
+          "400":
+            description: "Hubo un error validando el token"
+          "404":
+            description: "No hay elementos para mostrar"
+  /productos/favoritos/:productId:
+      patch:
+        summary: "Adds or remove (as appropriate) the product with the specific id from the user favorites array"
+        responses:
+          "200":
+            description: "El producto se agregó/quitó a favoritos"
+          "400":
+            description: "Bad request"
+          "400":
+            description: "Hubo un error validando el token"
+          "404":
+            description: "No existe ningun elemento con ese id"
+  /productos/modificar/:id:
+      patch:
+        summary: "Update the product with the specific id"
+        responses:
+          "200":
+            description: "El elemento fue actualizado"
+          "400":
+            description: "Bad request"
+          "400":
+            description: "Hubo un error validando el token"
+          "400":
+            description: "Falta al menos un dato válido para modificar"
+          "404":
+            description: "No existe ningun elemento con ese id"
+
+  /pedidos:
+    get:
+        summary: "Show all orders at the database if you are an admin user"
+        description: ""
+        responses:
+          "200":
+            description: "successful operation"
+            schema:
+              $ref: "#/definitions/getPedidos"
+          "400":
+            description: "Bad request"
+          "400":
+            description: "Hubo un error validando el token"
+          "401":
+            description: "Usuario no autorizado"
+    post:
+        summary: "Add a new order to the database"
+        description: ""
+        responses:
+          "200":
+            description: "El elemento fue agregado"
+          "400":
+            description: "Bad request"
+          "400":
+            description: "Hubo un error validando el token"
+          "400":
+            description: "Falta ingresar uno o más datos"
+          "400":
+            description: "Falta ingresar uno o más datos"
+          "400":
+            description: "Falta token para autorización"
+          "400":
+            description: "Metodo de pago inválido"
+        parameters:
+          - in: "body"
+            name: "body"
+            description: "Order object that needs to be added to the database"
+            required: true
+            schema:
+              $ref: "#/definitions/postPedidos"
+    patch:
+        summary: "Update the order status"
+        description: ""
+        parameters:
+        - in: "body"
+          name: "body"
+          description: "Order object that needs to be updated"
+          required: true
+          schema:
+            $ref: "#/definitions/patchPedidos"
+        responses:
+          "200":
+            description: "El elemento fue actualizado"
+          "400":
+            description: "Bad request"
+          "400":
+            description: "Hubo un error validando el token"
+          "400":
+            description: "Falta al menos un dato válido para modificar"
+          "401":
+            description: "Usuario no autorizado"
+          "404":
+            description: "No existe ningun elemento con ese id"
+  /pedidos/id/:orderId:
+    get:
+      summary: "Show the order at the database with the specific id"
+      responses:
+          "200":
+            description: "successful operation"
+            schema:
+              $ref: "#/definitions/getPedido"
+          "400":
+            description: "Bad request"
+          "400":
+            description: "Hubo un error validando el token"
+          "401":
+            description: "Usuario no autorizado"
+          "404":
+            description: "No hay elementos para mostrar"
+    delete:
+      summary: "Delete the order at the database with the specific id"
+      responses:
+          "200":
+            description: "El pedido fue eliminado"
+          "400":
+            description: "Bad request"
+          "400":
+            description: "Hubo un error validando el token"
+          "401":
+            description: "Usuario no autorizado"
+          "404":
+            description: "No existe ningun elemento con ese id"
+  /pedidos/estado/:orderStatus:
+    get:
+      summary: "Show all orders at the database with the specific status"
+      responses:
+          "200":
+            description: "successful operation"
+            schema:
+              $ref: "#/definitions/getPedido"
+          "400":
+            description: "Bad request"
+          "400":
+            description: "Hubo un error validando el token"
+          "401":
+            description: "Usuario no autorizado"
+          "404":
+            description: "No hay elementos para mostrar"
+  /pedidos/mispedidos:
+    get:
+      summary: "Show all orders at the database of the specific user"
+      responses:
+          "200":
+            description: "successful operation"
+            schema:
+              $ref: "#/definitions/getPedido"
+          "400":
+            description: "Bad request"
+          "400":
+            description: "Hubo un error validando el token"
+          "404":
+            description: "No hay elementos para mostrar"
+  
+  /usuarios:
+    get:
+      summary: "Show all users at the database if you are an admin user"
+      description: ""
+      responses:
+        "200":
+          description: "successful operation"
+            schema:
+              $ref: "#/definitions/getUsuarios"
+        "400":
+            description: "Bad request"
+        "400":
+          description: "Hubo un error validando el token"
+        "401":
+            description: "Usuario no autorizado"
+        "404":
+          description: "No hay elementos para mostrar"
+  /usuarios/id/:id:
+    get:
+      summary: "Show all users at the database, if you are an admin user, with the specific id"
+      description: ""
+      responses:
+        "200":
+          description: "successful operation"
+            schema:
+              $ref: "#/definitions/getUsuario"
+        "400":
+            description: "Bad request"
+        "400":
+          description: "Hubo un error validando el token"
+        "401":
+            description: "Usuario no autorizado"
+        "404":
+          description: "No existe ningun elemento con ese id"
+  /usuarios/perfil:
+    get:
+      summary: "Shows the logged user profile´s"
+      description: ""
+      responses:
+        "200":
+          description: "successful operation"
+            schema:
+              $ref: "#/definitions/getUsuario"
+              
+        "400":
+            description: "Bad request"
+  /usuarios/crearcuenta:
+    post:
+      summary: "Add a new usser to the database"
+      description: ""
+      responses:
+        "200":
+          description: "successful operation"
+        "400":
+          description: "Bad request"
+        "400":
+          description: "Falta ingresar uno o más datos"
+        "404":
+          description: "El email es utilizado por otro usuario"
+    parameters:
+      - in: "body"
+        name: "body"
+        description: "User object that needs to be added to the database"
+        required: true
+        schema:
+          $ref: "#/definitions/postUsuario"
+  /usuarios/login:
+    post:
+      summary: "Login"
+      description: ""
+      responses:
+        "200":
+          description: "successful operation"
+        "400":
+          description: "Bad request"
+        "400":
+          description: "Falta ingresar uno o más datos"
+        "404":
+          description: "Usuario y/o contraseña incorrectos"
+    parameters:
+      - in: "body"
+        name: "body"
+        description: "User object that needs to be login"
+        required: true
+        schema:
+          $ref: "#/definitions/login"
+  /usuarios/admin:
+    patch:
+      summary: "Convert an user in admin or remove the admin attribute"
+      description: ""
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "User object that needs to be update to admin or not admin"
+        required: true
+        schema:
+          $ref: "#/definitions/updateAdmin"
+      responses:
+        "200":
+          description: "successful operation"
+        "400":
+          description: "Bad request"
+        "400":
+          description: "Falta ingresar uno o más datos"
+        "400":
+          description: "Por favor indique valor correcto para isAdmin"
+        "400":
+          description: "Falta token para autorización"
+        "401":
+          description: "Usuario no autorizado"
+  /usuarios/modificar:
+    patch:
+      summary: "Updates an user properties"
+      description: "Only updates address, password and celphone"
+      parameters:
+      - in: "body"
+        name: "body"
+        description: "User object with the properties that needs to be update"
+        required: true
+        schema:
+          $ref: "#/definitions/updateUser"
+      responses:
+        "200":
+          description: "successful operation"
+        "400":
+          description: "Falta token para autorización"
+        "400":
+          description: "El/los id, email o nombre no pueden modificarse"
+        "400":
+          description: "Se necesita al menos un parámetro válido para modificar"
+          
+definitions:
+  getProductos:
+    type: "object"
+    properties:
+      productId:
+        type: "number"
+        example: 5
+      title:
+        type: "string"
+        example: "Veggie Abocado"
+      price:
+        type: "number"
+        example: 310
+      img:
+        type: "string"
+        example: 'https://media-cdn.tripadvisor.com/media/photo-s/11/ed/98/a0/veggie-avocado-tomato.jpg'
+  postProductos:
+    type: "object"
+    required:
+    - "title"
+    - "price"
+    - "img"
+    properties:
+      title:
+        type: "string"
+        example: "Veggie Abocado"
+      price:
+        type: "number"
+        example: 310
+      img:
+        type: "string"
+        example: 'https://media-cdn.tripadvisor.com/media/photo-s/11/ed/98/a0/veggie-avocado-tomato.jpg'
+  
+  getPedidos:
+    type: "object"
+    properties:
+      orderId:
+        type: "number"
+        example: 5
+      userId:
+        type: "number"
+        example: 5
+      productsDetail:
+          type: "array"
+          items: 
+            $ref: '#/definitions/productDetails'
+      status:
+        type: "string"
+        example: 'confirmado'
+      payloadMethod:
+          type: "string"
+          description: "Payload Method"
+          example: "efectivo"
+  postPedidos:
+    type: "object"
+    required:
+      - "userId"
+      - "productsDetail"
+      - "payloadMethod"
+    properties:
+      userId:
+          type: "number"
+          example: 1
+      productsDetail:
+          type: "array"
+          items: 
+            $ref: '#/definitions/productDetails'
+      payloadMethod:
+          type: "string"
+          description: "Payload Method"
+          enum:
+          - "efectivo"
+          - "tarjeta"
+  patchPedidos:
+    type: "object"
+    required:
+      - "orderId"
+      - "status"
+    properties:
+        orderId:
+          type: "number"
+          example: 2
+        status:
+          type: "string"
+          example: "nuevo"
+  getPedido:
+    type: "object"
+    properties:
+      orderId:
+        type: "number"
+        example: 5
+      userId:
+        type: "number"
+        example: 5
+      productsDetail:
+          type: "array"
+          items: 
+            $ref: '#/definitions/productDetails'
+      status:
+        type: "string"
+        example: 'confirmado'
+      payloadMethod:
+          type: "string"
+          description: "Payload Method"
+          example: "efectivo"
+  
+  getUsuarios:
+    type: "array of objects"
+    example: - userId: 1
+               fullName: "Jose Martinez"
+               email: "jose.martinez@gmail.com"
+               password: "jose123" (encrited)
+               address: "Santamarina 123"
+               celphone: '2569568743'
+               favoriteProductsById: null
+               isAdmin: 1
+             - userId: 2
+               fullName: "Maria Martinez"
+               email: "maria.martinez@gmail.com"
+               password: "maria123" (encripted)
+               address: "San Martin 123"
+               celphone: '2569568787'
+               favoriteProductsById: [1,2]
+               isAdmin: 0
+    properties:
+      userId:
+          type: "number"
+          example: 1
+      fullName:
+          type: "string"
+          example: "Jose Martinez"
+      email:
+          type: "string"
+          example: "jose.martinez@gmail.com"
+      password:
+          type: "string"
+          example: "jose123"
+      address:
+          type: "string"
+          example: "Santamarina 123"
+      celphone:
+          type: "string"
+          example: "2494876588"
+      favoriteProductsById:
+          type: "array"
+          example: [1,2]
+      isAdmin:
+          type: "boolean"
+          example: 1
+  getUsuario:
+    type: "object"
+    properties:
+      userId:
+          type: "number"
+          example: 1
+      fullName:
+          type: "string"
+          example: "Jose Martinez"
+      email:
+          type: "string"
+          example: "jose.martinez@gmail.com"
+      password:
+          type: "string"
+          example: "jose123"
+      address:
+          type: "string"
+          example: "Santamarina 123"
+      celphone:
+          type: "string"
+          example: "2494876588"
+      favoriteProductsById:
+          type: "array"
+          example: [1,2]
+      isAdmin:
+          type: "boolean"
+          example: 1
+  postUsuario:
+    type: "object"
+    required:
+        - "fullName"
+        - "email"
+        - "password"
+        - "address"
+        - "celphone"
+    properties:
+      fullName:
+          type: "string"
+          example: "Jose Martinez"
+      email:
+          type: "string"
+          example: "jose.martinez@gmail.com"
+      password:
+          type: "string"
+          example: "jose123"
+      address:
+          type: "string"
+          example: "Santamarina 123"
+      celphone:
+          type: "string"
+          example: "2494876588"
+      isAdmin:
+        type: "boolean"
+        example: false
+  login:
+    type: "object"
+    required:
+        - "email"
+        - "password"
+    properties:
+      email:
+        type: "string"
+        example: "maria.fernandez@gmail.com"
+      password:
+        type: "string"
+        example: "maria123"
+  updateAdmin:
+    type: "object"
+    required:
+        - "email"
+        - "isAdmin"
+    properties:
+      email:
+        type: "string"
+        example: "maria.fernandez@gmail.com"
+      isAdmin:
+        type: "boolean"
+        example: false
+  updateUser:
+    type: "object"
+    properties:
+      password:
+        type: "string"
+        example: "maria123"
+      address:
+        type: "string"
+        example: "Sarmiento 123"
+      celphone:
+        type: "string"
+        example: "1198765467"
+  
+  productDetails:
+    type: "object"
+    properties:
+      productId:
+          type: "number"
+          example: 1
+      qty:
+          type: "number"
+          example: 2
